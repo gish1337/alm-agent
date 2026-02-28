@@ -262,10 +262,15 @@
 
         /* ── REVEAL ── */
         .reveal {
-            opacity: 0; transform: translateY(32px);
-            transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
+            opacity: 1; transform: translateY(0);
         }
-        .reveal.vis { opacity: 1; transform: translateY(0); }
+        @media (prefers-reduced-motion: no-preference) {
+            .reveal.anim {
+                opacity: 0; transform: translateY(32px);
+                transition: opacity 0.75s cubic-bezier(0.16,1,0.3,1), transform 0.75s cubic-bezier(0.16,1,0.3,1);
+            }
+            .reveal.anim.vis { opacity: 1; transform: translateY(0); }
+        }
         .d1{transition-delay:.08s} .d2{transition-delay:.16s} .d3{transition-delay:.24s}
         .d4{transition-delay:.32s} .d5{transition-delay:.40s} .d6{transition-delay:.48s}
 
@@ -737,18 +742,20 @@
             hdr.classList.toggle('scrolled', window.scrollY > 24);
         }, { passive: true });
 
-        // ── SCROLL REVEAL ──
+        // ── SCROLL REVEAL (enhancement only) ──
+        const revEls = document.querySelectorAll('.reveal');
+        revEls.forEach(el => el.classList.add('anim'));
         const revObs = new IntersectionObserver((entries) => {
             entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
         }, { threshold: 0.01, rootMargin: '0px' });
-        document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
-        // Fallback: reveal anything already in viewport after short delay
+        revEls.forEach(el => revObs.observe(el));
+        // Immediately reveal anything already in/near viewport
         setTimeout(() => {
-            document.querySelectorAll('.reveal:not(.vis)').forEach(el => {
+            revEls.forEach(el => {
                 const r = el.getBoundingClientRect();
-                if (r.top < window.innerHeight + 100) el.classList.add('vis');
+                if (r.top < window.innerHeight + 200) el.classList.add('vis');
             });
-        }, 200);
+        }, 50);
 
         // ── HERO PARALLAX ──
         const heroEl = document.querySelector('.hero');
@@ -850,10 +857,9 @@
 
         function fmtPlain(t) {
             return esc(t)
-                .replace(/**(.*?)**/g, '<strong>$1</strong>')
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/`(.*?)`/g, '<code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:3px;font-size:12px;">$1</code>')
-                .replace(/
-/g, '<br>');
+                .replace(/\n/g, '<br>');
         }
 
         function formatMessage(text) {
@@ -861,18 +867,16 @@
             const hasSummary = /^Summary:/m.test(text);
             if (!hasIntent && !hasSummary) return fmtPlain(text);
 
-            const intentM  = text.match(/^Intent:s*(.+)/m);
-            const assumM   = text.match(/^Assumptions:s*(.+)/m);
-            const summaryM = text.match(/^Summary:s*([sS]+?)(?=
-Result JSON:|
-```|$)/m);
-            const nextM    = text.match(/^Next step:s*(.+)/mi);
+            const intentM  = text.match(/^Intent:\s*(.+)/m);
+            const assumM   = text.match(/^Assumptions:\s*(.+)/m);
+            const summaryM = text.match(/^Summary:\s*([\s\S]+?)(?=\nResult JSON:|\n```|$)/m);
+            const nextM    = text.match(/^Next step:\s*(.+)/mi);
 
             let jsonContent = '';
-            const cb = text.match(/```json([sS]*?)```/);
+            const cb = text.match(/```json([\s\S]*?)```/);
             if (cb) { jsonContent = cb[1].trim(); }
             else {
-                const ar = text.match(/Result JSON:[sS]*?({[sS]*?})/m);
+                const ar = text.match(/Result JSON:[\s\S]*?({[\s\S]*?})/m);
                 if (ar) jsonContent = ar[1].trim();
             }
 
@@ -892,7 +896,8 @@ Result JSON:|
             if (summary) html += '<div class="agent-summary">' + fmtPlain(summary) + '</div>';
             if (next)    html += '<div class="agent-next">→ ' + esc(next) + '</div>';
             if (jsonContent) {
-                html += '<span class="agent-json-toggle" onclick="toggleJson('' + uid + '')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg> Result JSON</span>';
+                html += '<span class="agent-json-toggle" onclick="toggleJson(\'' + uid + '\')">' +
+                    '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg> Result JSON</span>';
                 html += '<div class="agent-json-block" id="' + uid + '">' + esc(jsonContent) + '</div>';
             }
             html += '</div>';
