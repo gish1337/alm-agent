@@ -12,6 +12,9 @@ dist/
 # Vercel
 .vercel/
 
+# GitHub Actions (workflow scope not available on token)
+.github/
+
 # Logs
 *.log
 npm-debug.log*
