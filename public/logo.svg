@@ -1,62 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
-  <!-- Background -->
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
   <rect width="200" height="200" fill="#050505"/>
-
-  <!-- Left ear -->
-  <polygon points="38,40 58,80 18,80" fill="#111" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- Ear inner -->
-  <polygon points="38,48 52,75 24,75" fill="#1a1a1a"/>
-
-  <!-- Right ear -->
-  <polygon points="152,40 172,80 132,80" fill="#111" stroke="white" stroke-width="2.5" stroke-linejoin="round"/>
-  <!-- Ear inner -->
-  <polygon points="152,48 166,75 138,75" fill="#1a1a1a"/>
-
-  <!-- Head -->
-  <ellipse cx="100" cy="115" rx="68" ry="62" fill="#111" stroke="white" stroke-width="2.5"/>
-
-  <!-- Left eye white -->
-  <circle cx="76" cy="108" r="14" fill="white"/>
-  <!-- Left eye pupil -->
-  <ellipse cx="76" cy="108" rx="6" ry="10" fill="#050505"/>
-  <!-- Left eye shine -->
-  <circle cx="80" cy="104" r="3" fill="white"/>
-
-  <!-- Right eye white -->
-  <circle cx="124" cy="108" r="14" fill="white"/>
-  <!-- Right eye pupil -->
-  <ellipse cx="124" cy="108" rx="6" ry="10" fill="#050505"/>
-  <!-- Right eye shine -->
-  <circle cx="128" cy="104" r="3" fill="white"/>
-
-  <!-- Nose -->
-  <polygon points="100,122 96,127 104,127" fill="white"/>
-
-  <!-- Mouth -->
-  <path d="M96,127 Q92,133 88,131" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
-  <path d="M104,127 Q108,133 112,131" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"/>
-
-  <!-- Whiskers left -->
-  <line x1="56" y1="122" x2="90" y2="126" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="54" y1="130" x2="89" y2="130" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="56" y1="138" x2="90" y2="134" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-
-  <!-- Whiskers right -->
-  <line x1="144" y1="122" x2="110" y2="126" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="146" y1="130" x2="111" y2="130" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-  <line x1="144" y1="138" x2="110" y2="134" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-
-  <!-- Star of David on forehead (blue) -->
-  <!-- Triangle up -->
-  <polygon points="100,75 91,91 109,91" fill="none" stroke="#4a9eff" stroke-width="2.2" stroke-linejoin="round"/>
-  <!-- Triangle down -->
-  <polygon points="100,97 91,81 109,81" fill="none" stroke="#4a9eff" stroke-width="2.2" stroke-linejoin="round"/>
-
-  <!-- Code bracket < on left side -->
-  <text x="10" y="120" font-family="monospace" font-size="28" font-weight="bold" fill="white" opacity="0.9">&lt;</text>
-
-  <!-- Code lines on right side -->
-  <rect x="158" y="108" width="24" height="3.5" rx="2" fill="white" opacity="0.85"/>
-  <rect x="158" y="116" width="18" height="3.5" rx="2" fill="white" opacity="0.6"/>
-  <rect x="158" y="124" width="21" height="3.5" rx="2" fill="white" opacity="0.4"/>
+  <defs>
+    <path id="ringPath" d="M100,14 a86,86 0 1,1 -0.01,0"/>
+    <clipPath id="chartClip"><circle cx="100" cy="100" r="60"/></clipPath>
+  </defs>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="#7ec8e3" stroke-width="1.2" opacity="0.5"/>
+  <circle cx="100" cy="100" r="78" fill="none" stroke="#7ec8e3" stroke-width="0.6" opacity="0.25"/>
+  <text font-family="monospace" font-size="6.5" fill="#7ec8e3" letter-spacing="1.1" opacity="0.85">
+    <textPath href="#ringPath">01010101010101010101010101010101010101010101010101010101010101010101011010101010101010101010101</textPath>
+  </text>
+  <text x="4" y="112" font-family="monospace" font-size="36" font-weight="700" fill="#7ec8e3" opacity="0.9">&lt;</text>
+  <text x="155" y="112" font-family="monospace" font-size="36" font-weight="700" fill="#7ec8e3" opacity="0.9">&gt;</text>
+  <circle cx="100" cy="100" r="66" fill="#07121a"/>
+  <circle cx="100" cy="100" r="66" fill="none" stroke="#7ec8e3" stroke-width="1.5"/>
+  <g clip-path="url(#chartClip)">
+    <ellipse cx="100" cy="108" rx="54" ry="38" fill="#0d2030" opacity="0.7"/>
+    <line x1="54"  y1="88"  x2="54"  y2="122" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="68"  y1="80"  x2="68"  y2="112" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="82"  y1="86"  x2="82"  y2="120" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="96"  y1="76"  x2="96"  y2="114" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="110" y1="84"  x2="110" y2="118" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="124" y1="90"  x2="124" y2="124" stroke="#7ec8e3" stroke-width="1.3"/>
+    <line x1="138" y1="86"  x2="138" y2="118" stroke="#7ec8e3" stroke-width="1.3"/>
+    <rect x="50"  y="95"  width="8" height="16" fill="#7ec8e3" rx="1"/>
+    <rect x="64"  y="87"  width="8" height="14" fill="#7ec8e3" rx="1"/>
+    <rect x="78"  y="92"  width="8" height="18" fill="none" stroke="#7ec8e3" stroke-width="1.2" rx="1"/>
+    <rect x="92"  y="84"  width="8" height="16" fill="#7ec8e3" rx="1"/>
+    <rect x="106" y="91"  width="8" height="18" fill="none" stroke="#7ec8e3" stroke-width="1.2" rx="1"/>
+    <rect x="120" y="96"  width="8" height="16" fill="#7ec8e3" rx="1"/>
+    <rect x="134" y="90"  width="8" height="16" fill="#7ec8e3" rx="1"/>
+    <polyline points="54,103 68,94 82,101 96,92 110,100 124,104 138,98"
+      fill="none" stroke="#7ec8e3" stroke-width="1.6"
+      stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  </g>
 </svg>
