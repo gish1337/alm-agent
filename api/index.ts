@@ -3,6 +3,7 @@ import { loadConfig } from '../src/config';
 import { WebBot } from '../src/bot/web';
 import { SAPProtocol } from '../src/agent-protocol';
 import { SolanaAgent } from '../src/solana/agent';
+import { buildSystemPrompt } from '../src/ai/processor';
 
 // Кэш для переиспользования между serverless-вызовами (warm instance)
 let appHandler: ((req: IncomingMessage, res: ServerResponse) => void) | null = null;
@@ -34,7 +35,7 @@ async function initApp(): Promise<void> {
         port: 3000,
         processorConfig: {
             modelConfig: config.ai,
-            systemPrompt: 'Ты AI-агент для Solana blockchain. Помогай с балансами, транзакциями, ценами токенов и информацией о сети.',
+            systemPrompt: buildSystemPrompt(),
             sapProtocol
         }
     });
