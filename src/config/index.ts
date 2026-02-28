@@ -36,34 +36,34 @@ export interface BotConfig {
 
 export function loadConfig(): BotConfig {
     // Определяем режим работы
-    const mode = (process.env.BOT_MODE as 'twitter' | 'web') || 'web';
+    const mode = ((process.env.BOT_MODE || 'web').trim() as 'twitter' | 'web');
 
     // Определяем провайдера AI
-    const aiProvider = (process.env.AI_PROVIDER as 'ollama' | 'openai' | 'local') || 'local';
+    const aiProvider = ((process.env.AI_PROVIDER || 'local').trim() as 'ollama' | 'openai' | 'local');
 
     // Конфигурация AI
     const aiConfig: AIModelConfig = {
         provider: aiProvider,
-        modelName: process.env.AI_MODEL_NAME || (aiProvider === 'openai' ? 'gpt-4o-mini' : aiProvider === 'ollama' ? 'llama3' : 'local'),
-        apiKey: process.env.OPENAI_API_KEY,
-        baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434',
-        temperature: parseFloat(process.env.AI_TEMPERATURE || '0.7'),
-        maxTokens: parseInt(process.env.AI_MAX_TOKENS || '1000', 10)
+        modelName: (process.env.AI_MODEL_NAME || (aiProvider === 'openai' ? 'gpt-4o-mini' : aiProvider === 'ollama' ? 'llama3' : 'local')).trim(),
+        apiKey: process.env.OPENAI_API_KEY?.trim(),
+        baseUrl: (process.env.OLLAMA_BASE_URL || 'http://localhost:11434').trim(),
+        temperature: parseFloat((process.env.AI_TEMPERATURE || '0.7').trim()),
+        maxTokens: parseInt((process.env.AI_MAX_TOKENS || '1000').trim(), 10)
     };
 
     // Конфигурация Solana
     const solanaConfig = {
-        enabled: process.env.SOLANA_ENABLED !== 'false', // По умолчанию включено
-        rpcUrl: process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com',
-        network: (process.env.SOLANA_NETWORK as 'mainnet' | 'devnet' | 'testnet') || 'mainnet'
+        enabled: (process.env.SOLANA_ENABLED || 'true').trim() !== 'false',
+        rpcUrl: (process.env.SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com').trim(),
+        network: ((process.env.SOLANA_NETWORK || 'mainnet').trim() as 'mainnet' | 'devnet' | 'testnet')
     };
 
     // Конфигурация Solana Agent Protocol (SAP)
     const sapConfig = {
-        enabled: process.env.SAP_ENABLED !== 'false', // По умолчанию включено
-        agentName: process.env.SAP_AGENT_NAME || 'Solana AI Agent',
-        agentDescription: process.env.SAP_AGENT_DESCRIPTION || 'Advanced AI agent for Solana blockchain interactions',
-        agentVersion: process.env.SAP_AGENT_VERSION || '1.0.0'
+        enabled: (process.env.SAP_ENABLED || 'true').trim() !== 'false',
+        agentName: (process.env.SAP_AGENT_NAME || 'Solana AI Agent').trim(),
+        agentDescription: (process.env.SAP_AGENT_DESCRIPTION || 'Advanced AI agent for Solana blockchain interactions').trim(),
+        agentVersion: (process.env.SAP_AGENT_VERSION || '1.0.0').trim()
     };
 
     // Конфигурация Twitter (всегда загружается, чтобы веб-режим тоже мог публиковать твиты)

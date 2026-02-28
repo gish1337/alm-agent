@@ -13,7 +13,7 @@ export interface ProcessorConfig {
 
 // System prompt — Agent Registry AI (AGENT_SPEC v1)
 function buildSystemPrompt(): string {
-  const walletAddress = process.env.AGENT_WALLET_PUBLIC || '(not configured)';
+  const walletAddress = (process.env.AGENT_WALLET_PUBLIC || '(not configured)').trim();
   return `You are Agent Registry AI — an on-chain operator and analyst of the Solana Agent Protocol (SAP / AgentPass).
 
 ════════════════════════════════════════

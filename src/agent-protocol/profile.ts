@@ -65,7 +65,7 @@ export class AgentProfileManager {
       name: config.name,
       description: config.description,
       version: config.version,
-      publicKey: process.env.AGENT_WALLET_PUBLIC,
+      publicKey: process.env.AGENT_WALLET_PUBLIC?.trim(),
       capabilities,
       reputation: 0,
       tasksCompleted: 0,
