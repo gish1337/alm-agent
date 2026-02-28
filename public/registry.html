@@ -1,682 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Agent Registry — ALM</title>
-  <link rel="icon" href="/logo.svg" type="image/svg+xml">
-  <style>
-    :root {
-      --bg:          #050505;
-      --surface:     #0a0a0a;
-      --card:        #0a0a0a;
-      --border:      #1a1a1a;
-      --border-l:    #252525;
-      --accent:      #4a9eff;
-      --accent-dim:  rgba(74,158,255,0.1);
-      --accent2:     #22c55e;
-      --text:        #ffffff;
-      --muted:       #888888;
-      --text-dim:    #555555;
-      --danger:      #f87171;
-      --trading:     #f59e0b;
-      --defi:        #22c55e;
-      --framework:   #4a9eff;
-      --nft:         #f472b6;
-      --analytics:   #818cf8;
-      --utility:     #34d399;
-      --other:       #6b7280;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      min-height: 100vh;
-      letter-spacing: -0.01em;
-    }
-
-    /* ── Header ─────────────────────────────── */
-    header {
-      position: sticky;
-      top: 0;
-      background: rgba(5,5,5,0.9);
-      backdrop-filter: blur(20px) saturate(180%);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 40px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-      z-index: 100;
-    }
-    .logo { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .logo-icon {
-      width: 28px; height: 28px; border-radius: 6px;
-      background: linear-gradient(135deg, var(--accent), #2d5f9a);
-      position: relative; overflow: hidden; flex-shrink: 0;
-    }
-    .logo-icon::after {
-      content: '';
-      position: absolute; inset: 0;
-      background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
-      animation: shimmer 3s infinite;
-    }
-    @keyframes shimmer {
-      0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-      100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
-    .logo-text h1 { font-size: 18px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
-    .logo-text p { font-size: 12px; color: var(--muted); margin-top: 1px; }
-
-    .header-nav { display: flex; gap: 12px; align-items: center; }
-    .nav-link {
-      color: var(--muted); text-decoration: none; font-size: 14px;
-      padding: 6px 14px; border-radius: 8px; transition: all .2s;
-    }
-    .nav-link:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-    .nav-link.active { color: var(--accent); }
-
-    /* ── Stats bar ────────────────────────────── */
-    .stats-bar {
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 10px 40px;
-      display: flex; gap: 40px; align-items: center;
-    }
-    .stat-item { display: flex; align-items: center; gap: 8px; }
-    .stat-num { font-size: 18px; font-weight: 700; color: var(--accent); }
-    .stat-label { font-size: 12px; color: var(--muted); }
-
-    /* ── Main ────────────────────────────────── */
-    main { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
-
-    /* ── Controls ────────────────────────────── */
-    .controls {
-      display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap;
-      align-items: center;
-    }
-    .search-box {
-      flex: 1; min-width: 240px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 10px 16px;
-      color: var(--text); font-size: 14px; outline: none;
-      transition: border-color .2s;
-    }
-    .search-box:focus { border-color: var(--accent); }
-    .search-box::placeholder { color: var(--muted); }
-
-    .filter-wrap { display: flex; gap: 8px; flex-wrap: wrap; }
-    .filter-btn {
-      padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
-      background: transparent; color: var(--muted); font-size: 13px;
-      cursor: pointer; transition: all .2s; font-weight: 500;
-    }
-    .filter-btn:hover { border-color: var(--border-l); color: var(--text); }
-    .filter-btn.active {
-      background: var(--accent); border-color: var(--accent);
-      color: #000;
-    }
-    .filter-btn[data-cat="trading"].active  { background: var(--trading);   border-color: var(--trading);   color: #000; }
-    .filter-btn[data-cat="defi"].active     { background: var(--defi);      border-color: var(--defi);      color: #000; }
-    .filter-btn[data-cat="nft"].active      { background: var(--nft);       border-color: var(--nft);       color: #000; }
-    .filter-btn[data-cat="analytics"].active{ background: var(--analytics); border-color: var(--analytics); color: #000; }
-    .filter-btn[data-cat="utility"].active  { background: var(--utility);   border-color: var(--utility);   color: #000; }
-    .filter-btn[data-cat="other"].active    { background: var(--other);     border-color: var(--other);     color: #000; }
-
-    /* ── Register CTA ─────────────────────────── */
-    .register-btn {
-      margin-left: auto;
-      padding: 9px 18px; border-radius: 8px;
-      background: var(--accent);
-      color: #000; font-size: 13px; font-weight: 600;
-      border: none; cursor: pointer; transition: background .2s;
-      white-space: nowrap;
-    }
-    .register-btn:hover { background: #5aa8ff; }
-
-    /* ── Grid ────────────────────────────────── */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    /* ── Agent Card ──────────────────────────── */
-    .card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 12px; padding: 20px;
-      transition: border-color .2s, transform .15s;
-      display: flex; flex-direction: column; gap: 14px;
-    }
-    .card:hover { border-color: var(--border-l); transform: translateY(-2px); }
-
-    .card-header { display: flex; align-items: flex-start; gap: 14px; }
-    .card-avatar {
-      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 700; color: #fff;
-    }
-    .card-meta { flex: 1; min-width: 0; }
-    .card-name {
-      font-size: 16px; font-weight: 700; color: var(--text);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
-    .card-version { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-    .cat-badge {
-      display: inline-block; padding: 3px 10px; border-radius: 20px;
-      font-size: 10px; font-weight: 700; letter-spacing: .5px;
-      text-transform: uppercase; margin-top: 5px;
-    }
-    .cat-framework { background: rgba(153,69,255,.2); color: var(--framework); }
-    .cat-trading   { background: rgba(255,165,2,.2);  color: var(--trading); }
-    .cat-defi      { background: rgba(46,213,115,.2); color: var(--defi); }
-    .cat-nft       { background: rgba(255,107,129,.2);color: var(--nft); }
-    .cat-analytics { background: rgba(30,144,255,.2); color: var(--analytics); }
-    .cat-utility   { background: rgba(236,204,104,.2);color: var(--utility); }
-    .cat-other     { background: rgba(116,125,140,.2);color: var(--other); }
-
-    .card-desc {
-      font-size: 13px; color: var(--muted); line-height: 1.55;
-      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    /* reputation */
-    .rep-row { display: flex; align-items: center; gap: 10px; }
-    .rep-label { font-size: 12px; color: var(--muted); width: 80px; flex-shrink: 0; }
-    .rep-bar-bg {
-      flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
-    }
-    .rep-bar-fill {
-      height: 100%; border-radius: 3px;
-      background: linear-gradient(90deg, #2d5f9a, var(--accent));
-      transition: width 1s ease;
-      width: 0;
-    }
-    .rep-num { font-size: 13px; font-weight: 700; color: var(--accent); width: 32px; text-align: right; }
-
-    /* stats mini */
-    .mini-stats { display: flex; gap: 0; border-top: 1px solid var(--border); padding-top: 12px; }
-    .mini-stat { flex: 1; text-align: center; }
-    .mini-stat + .mini-stat { border-left: 1px solid var(--border); }
-    .mini-stat-num { font-size: 14px; font-weight: 700; color: var(--text); }
-    .mini-stat-label { font-size: 10px; color: var(--muted); margin-top: 2px; }
-
-    /* tags */
-    .tags { display: flex; gap: 6px; flex-wrap: wrap; }
-    .tag {
-      font-size: 10px; padding: 3px 8px; border-radius: 6px;
-      background: var(--surface); color: var(--muted); border: 1px solid var(--border);
-    }
-
-    /* links */
-    .card-links { display: flex; gap: 8px; flex-wrap: wrap; }
-    .card-link {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; color: var(--muted); text-decoration: none;
-      padding: 4px 10px; border-radius: 6px; border: 1px solid var(--border);
-      transition: all .2s;
-    }
-    .card-link:hover { color: var(--accent); border-color: var(--accent); }
-
-    /* ── Register modal ──────────────────────── */
-    .modal-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.7); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    .modal-overlay.open { display: flex; }
-    .modal {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 32px; width: 100%; max-width: 520px;
-      max-height: 90vh; overflow-y: auto;
-    }
-    .modal h2 { font-size: 20px; margin-bottom: 4px; }
-    .modal p { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px;
-      outline: none; transition: border-color .2s; resize: vertical;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: var(--accent);
-    }
-    .form-group select option { background: var(--surface); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
-    .btn-primary {
-      flex: 1; padding: 12px; border-radius: 8px;
-      background: var(--accent);
-      color: #000; font-size: 14px; font-weight: 600; border: none; cursor: pointer;
-      transition: background .2s;
-    }
-    .btn-primary:hover { background: #5aa8ff; }
-    .btn-cancel {
-      padding: 12px 20px; border-radius: 10px;
-      background: transparent; border: 1px solid var(--border);
-      color: var(--muted); font-size: 14px; cursor: pointer;
-    }
-    #register-result { margin-top: 12px; font-size: 13px; padding: 10px 14px; border-radius: 8px; display: none; }
-    #register-result.ok  { background: rgba(34,197,94,.1);  color: var(--accent2); border: 1px solid rgba(34,197,94,.2); }
-    #register-result.err { background: rgba(248,113,113,.1); color: var(--danger);  border: 1px solid rgba(248,113,113,.2); }
-
-    /* loading */
-    .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 16px; }
-    .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 15px; }
-
-    /* ── Live data strip ─────────────────────── */
-    .live-strip {
-      display: flex; gap: 10px; flex-wrap: wrap;
-      border-top: 1px solid var(--border); padding-top: 10px;
-    }
-    .live-pill {
-      display: flex; align-items: center; gap: 4px;
-      font-size: 11px; color: var(--muted);
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 6px; padding: 3px 8px;
-    }
-    .live-pill .live-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent2); animation: blink 2s infinite;
-    }
-    .live-pill.up   { color: var(--accent2); border-color: rgba(34,197,94,.25); }
-    .live-pill.down { color: var(--danger);  border-color: rgba(248,113,113,.25); }
-    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:.3; } }
-
-    /* crawler status bar */
-    .crawler-bar {
-      background: rgba(74,158,255,.05); border: 1px solid rgba(74,158,255,.15);
-      border-radius: 8px; padding: 8px 16px; margin-bottom: 20px;
-      font-size: 12px; color: var(--muted); display: flex; gap: 16px; align-items: center;
-    }
-    .crawler-bar .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-dim); }
-    .crawler-bar.active .dot { background: var(--accent2); animation: blink 2s infinite; }
-    .crawler-bar span { color: var(--text); }
-
-    @media (max-width: 680px) {
-      header, main, .stats-bar { padding-left: 16px; padding-right: 16px; }
-      .grid { grid-template-columns: 1fr; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALM — Registry</title>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml">
+    <style>
+        *, *::before, *::after { margin:0;padding:0;box-sizing:border-box; }
+        :root {
+            --accent:     #00d4ff;
+            --accent-2:   #7c3aed;
+            --bg:         #020206;
+            --bg-card:    rgba(255,255,255,0.025);
+            --bg-card-h:  rgba(255,255,255,0.05);
+            --text:       #f0f0f4;
+            --text-muted: rgba(240,240,244,0.5);
+            --text-dim:   rgba(240,240,244,0.22);
+            --border:     rgba(255,255,255,0.06);
+            --border-a:   rgba(0,212,255,0.18);
+            --green:      #22c55e;
+            --green-dim:  rgba(34,197,94,0.1);
+            --red:        #ef4444;
+        }
+        html { scroll-behavior:smooth; }
+        body { font-family:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased; }
+        .orb { position:fixed;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0; }
+        .orb-1 { width:600px;height:600px;background:radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 70%);top:-200px;left:-150px;animation:o1 22s ease-in-out infinite; }
+        .orb-2 { width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,0.045) 0%,transparent 70%);bottom:-80px;right:-80px;animation:o2 28s ease-in-out infinite; }
+        @keyframes o1 { 0%,100%{transform:translate(0,0)}50%{transform:translate(50px,40px)} }
+        @keyframes o2 { 0%,100%{transform:translate(0,0)}50%{transform:translate(-40px,-50px)} }
+        .grid-bg { position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px);background-size:80px 80px;mask-image:radial-gradient(ellipse 80% 50% at 50% 0%,black 0%,transparent 100%); }
+        .z1 { position:relative;z-index:1; }
+        #sp { position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;z-index:1000;box-shadow:0 0 10px var(--accent);transition:width 0.08s linear; }
+        nav { position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 72px;height:64px;background:rgba(2,2,6,0.82);backdrop-filter:blur(28px) saturate(180%);border-bottom:1px solid var(--border); }
+        .nl { display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text); }
+        .nl img { width:28px;height:28px;border-radius:6px; }
+        .nl span { font-size:15px;font-weight:600;letter-spacing:-0.02em; }
+        .nl-sub { color:var(--text-dim);font-weight:400; }
+        .nr { display:flex;gap:4px;align-items:center; }
+        .nr a { padding:6px 12px;color:var(--text-muted);text-decoration:none;font-size:13px;font-weight:500;border-radius:7px;transition:color 0.2s,background 0.2s; }
+        .nr a:hover { color:var(--text);background:rgba(255,255,255,0.05); }
+        .nbadge { padding:4px 11px;border-radius:100px;background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.18);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent); }
+        .page { max-width:1080px;margin:0 auto;padding:48px 24px 100px; }
+        @media(max-width:640px){ nav{padding:0 16px} .page{padding:32px 16px 80px} }
+        /* Hero */
+        .hero-area { margin-bottom:40px; }
+        .hero-tag { font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent);font-weight:700;margin-bottom:10px; }
+        .hero-area h1 { font-size:36px;font-weight:800;letter-spacing:-0.04em;margin-bottom:8px;background:linear-gradient(135deg,#fff 0%,rgba(240,240,244,0.6) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+        .hero-area p { color:var(--text-muted);font-size:15px;margin-bottom:24px;max-width:520px;line-height:1.6; }
+        /* Stats bar */
+        .stats-bar { display:flex;gap:24px;padding:18px 24px;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;margin-bottom:28px; }
+        .sb-item { display:flex;flex-direction:column;gap:2px; }
+        .sb-val { font-size:20px;font-weight:700;letter-spacing:-0.02em; }
+        .sb-label { font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);font-weight:600; }
+        .sb-updated { font-size:11px;color:var(--text-dim);margin-left:auto;align-self:center; }
+        /* Controls */
+        .controls { display:flex;gap:12px;align-items:center;margin-bottom:24px;flex-wrap:wrap; }
+        .search-wrap { position:relative;flex:1;min-width:200px; }
+        .search-wrap svg { position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none; }
+        #search { width:100%;padding:9px 14px 9px 36px;background:var(--bg-card);border:1px solid var(--border);border-radius:9px;color:var(--text);font-size:13px;outline:none;transition:border-color 0.2s; }
+        #search::placeholder { color:var(--text-dim); }
+        #search:focus { border-color:var(--border-a); }
+        .filters { display:flex;gap:6px;flex-wrap:wrap; }
+        .filter-btn { padding:6px 13px;border-radius:7px;border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s; }
+        .filter-btn:hover { border-color:rgba(255,255,255,0.12);color:var(--text); }
+        .filter-btn.active { background:rgba(0,212,255,0.08);border-color:var(--border-a);color:var(--accent); }
+        .btn-register { padding:9px 18px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:opacity 0.2s;flex-shrink:0; }
+        .btn-register:hover { opacity:0.85; }
+        /* Grid */
+        .grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px; }
+        .empty { text-align:center;padding:60px 20px;color:var(--text-dim);font-size:14px;grid-column:1/-1; }
+        /* Card */
+        .card { background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:12px;transition:border-color 0.2s,background 0.2s;position:relative;overflow:hidden; }
+        .card::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.12),transparent); }
+        .card:hover { border-color:rgba(255,255,255,0.1);background:var(--bg-card-h); }
+        .card-header { display:flex;align-items:center;gap:12px; }
+        .card-avatar { width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0; }
+        .card-meta { flex:1;min-width:0; }
+        .card-name { font-size:15px;font-weight:700;letter-spacing:-0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .card-version { font-size:11px;color:var(--text-dim);margin-top:1px; }
+        .cat-badge { font-size:10px;padding:2px 8px;border-radius:4px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;margin-top:4px;display:inline-block; }
+        .cat-framework { background:rgba(153,69,255,0.12);color:#9945ff;border:1px solid rgba(153,69,255,0.2); }
+        .cat-trading   { background:rgba(255,165,2,0.12); color:#ffa502;border:1px solid rgba(255,165,2,0.2); }
+        .cat-defi      { background:rgba(46,213,115,0.12);color:#2ed573;border:1px solid rgba(46,213,115,0.2); }
+        .cat-nft       { background:rgba(255,107,129,0.12);color:#ff6b81;border:1px solid rgba(255,107,129,0.2); }
+        .cat-analytics { background:rgba(0,212,255,0.08);color:var(--accent);border:1px solid rgba(0,212,255,0.15); }
+        .cat-utility   { background:rgba(255,255,255,0.05);color:var(--text-muted);border:1px solid var(--border); }
+        .cat-other     { background:rgba(255,255,255,0.04);color:var(--text-dim);border:1px solid var(--border); }
+        .card-desc { font-size:13px;color:var(--text-muted);line-height:1.6;flex:1; }
+        .rep-row { display:flex;align-items:center;gap:8px; }
+        .rep-label { font-size:11px;color:var(--text-dim);width:62px;flex-shrink:0; }
+        .rep-bar-bg { flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden; }
+        .rep-bar-fill { height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;transition:width 1s cubic-bezier(0.4,0,0.2,1);width:0%;box-shadow:0 0 6px rgba(0,212,255,0.3); }
+        .rep-num { font-size:12px;font-weight:700;color:var(--accent);width:24px;text-align:right; }
+        .mini-stats { display:flex;gap:12px;padding:10px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border); }
+        .mini-stat { flex:1;text-align:center; }
+        .mini-stat-num { font-size:16px;font-weight:700;letter-spacing:-0.02em; }
+        .mini-stat-label { font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);font-weight:600;margin-top:2px; }
+        .tags { display:flex;flex-wrap:wrap;gap:5px; }
+        .tag { font-size:11px;padding:3px 9px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:5px;color:var(--text-muted); }
+        .live-strip { display:flex;flex-wrap:wrap;gap:5px; }
+        .live-pill { font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--text-dim);display:inline-flex;align-items:center;gap:4px; }
+        .live-pill.up { background:var(--green-dim);color:var(--green);border-color:rgba(34,197,94,0.2); }
+        .live-pill.down { background:rgba(239,68,68,0.07);color:var(--red);border-color:rgba(239,68,68,0.15); }
+        .live-dot { width:5px;height:5px;border-radius:50%;background:var(--green);animation:ldot 2s infinite; }
+        @keyframes ldot { 0%,100%{opacity:1}50%{opacity:0.3} }
+        .card-links { display:flex;gap:8px;flex-wrap:wrap; }
+        .card-link { font-size:11px;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border:1px solid var(--border);border-radius:5px;transition:color 0.2s,border-color 0.2s; }
+        .card-link:hover { color:var(--accent);border-color:var(--border-a); }
+        .rv { opacity:0;transform:translateY(20px);transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+        .rv.vis { opacity:1;transform:translateY(0); }
+        /* Modal */
+        .modal { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(4px); }
+        .modal.open { display:flex; }
+        .modal-box { background:#0d0d12;border:1px solid var(--border);border-radius:16px;padding:32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative; }
+        .modal-box::before { content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,255,0.2),transparent); }
+        .modal-title { font-size:18px;font-weight:700;letter-spacing:-0.03em;margin-bottom:20px; }
+        .form-group { display:flex;flex-direction:column;gap:5px;margin-bottom:14px; }
+        .form-group label { font-size:11px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;color:var(--text-dim); }
+        .form-row { display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px; }
+        .form-group input, .form-group textarea, .form-group select {
+            background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:9px 13px;
+            color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:vertical;
+            transition:border-color 0.2s;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color:var(--border-a); }
+        .form-group select option { background:#0d0d12; }
+        .modal-actions { display:flex;gap:10px;justify-content:flex-end;margin-top:20px; }
+        .btn-cancel { padding:9px 18px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:13px;font-weight:600;border-radius:8px;cursor:pointer;transition:all 0.2s; }
+        .btn-cancel:hover { border-color:rgba(255,255,255,0.12);color:var(--text); }
+        .btn-primary { padding:9px 18px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;font-size:13px;font-weight:700;border-radius:8px;cursor:pointer;transition:opacity 0.2s; }
+        .btn-primary:hover { opacity:0.85; }
+        .result-ok  { padding:10px 14px;background:var(--green-dim);border:1px solid rgba(34,197,94,0.25);border-radius:8px;color:var(--green);font-size:13px;margin-top:12px; }
+        .result-err { padding:10px 14px;background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:8px;color:var(--red);font-size:13px;margin-top:12px; }
+    </style>
 </head>
 <body>
+<div id="sp"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="grid-bg"></div>
 
-<!-- ── Header ───────────────────────────────────────────────────────── -->
-<header>
-  <a class="logo" href="/">
-    <img src="/logo.svg" alt="ALM" style="width:38px;height:38px;border-radius:8px;flex-shrink:0;">
-    <div class="logo-text">
-      <h1>ALM</h1>
-      <p>Agent Registry</p>
+<nav class="z1">
+    <a class="nl" href="/">
+        <img src="/logo.svg" alt="ALM">
+        <span>ALM <span class="nl-sub">/ Registry</span></span>
+    </a>
+    <div class="nr">
+        <a href="/">Chat</a>
+        <a href="/agent">Profile</a>
+        <a href="/manifest">Manifest</a>
+        <a href="https://github.com/ALM-AI552/alm-agent" target="_blank">GitHub</a>
+        <span class="nbadge">SAP v1</span>
     </div>
-  </a>
-  <nav class="header-nav">
-    <a href="/" class="nav-link">Chat</a>
-    <a href="/agent" class="nav-link">My Agent</a>
-    <a href="/registry" class="nav-link active">Registry</a>
-    <a href="https://github.com/ALM-AI552/alm-agent" target="_blank" class="nav-link">GitHub</a>
-  </nav>
-</header>
+</nav>
 
-<!-- ── Stats bar ─────────────────────────────────────────────────────── -->
-<div class="stats-bar">
-  <div class="stat-item">
-    <span class="stat-num" id="stat-total">–</span>
-    <span class="stat-label">Agents</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-num" id="stat-avg-rep">–</span>
-    <span class="stat-label">Avg Reputation</span>
-  </div>
-  <div class="stat-item">
-    <span class="stat-num" id="stat-top">–</span>
-    <span class="stat-label">Top Agent</span>
-  </div>
-  <div class="stat-item" style="margin-left:auto;color:var(--muted);font-size:12px;" id="stat-updated"></div>
+<div class="page z1">
+    <div class="hero-area rv">
+        <div class="hero-tag">Agent Registry</div>
+        <h1>Solana Agent Network</h1>
+        <p>Discover, compare and register AI agents on the Solana Agent Protocol.</p>
+    </div>
+
+    <div class="stats-bar rv">
+        <div class="sb-item"><div class="sb-val" id="stat-total">—</div><div class="sb-label">Total Agents</div></div>
+        <div class="sb-item"><div class="sb-val" id="stat-avg-rep">—</div><div class="sb-label">Avg Reputation</div></div>
+        <div class="sb-item"><div class="sb-val" id="stat-top">—</div><div class="sb-label">Top Agent</div></div>
+        <span class="sb-updated" id="stat-updated"></span>
+    </div>
+
+    <div class="controls rv">
+        <div class="search-wrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search" type="text" placeholder="Search agents, tags..." autocomplete="off">
+        </div>
+        <div class="filters">
+            <button class="filter-btn active" data-cat="">All</button>
+            <button class="filter-btn" data-cat="framework">Framework</button>
+            <button class="filter-btn" data-cat="trading">Trading</button>
+            <button class="filter-btn" data-cat="defi">DeFi</button>
+            <button class="filter-btn" data-cat="nft">NFT</button>
+            <button class="filter-btn" data-cat="analytics">Analytics</button>
+        </div>
+        <button class="btn-register" id="open-register">+ Register Agent</button>
+    </div>
+
+    <div class="grid" id="grid">
+        <div class="empty">Loading agents...</div>
+    </div>
 </div>
 
-<!-- ── Main ──────────────────────────────────────────────────────────── -->
-<main>
-  <div class="crawler-bar" id="crawler-bar">
-    <div class="dot"></div>
-    <span id="crawler-status">Crawler: checking...</span>
-    <span style="margin-left:auto;cursor:pointer;color:var(--accent);font-size:11px;font-weight:600;letter-spacing:0.04em;text-transform:uppercase" id="crawl-now">Run now</span>
-  </div>
-
-  <div class="controls">
-    <input class="search-box" id="search" type="text" placeholder="Search agents, tags..." />
-    <div class="filter-wrap">
-      <button class="filter-btn active" data-cat="">All</button>
-      <button class="filter-btn" data-cat="framework">Framework</button>
-      <button class="filter-btn" data-cat="trading">Trading</button>
-      <button class="filter-btn" data-cat="defi">DeFi</button>
-      <button class="filter-btn" data-cat="nft">NFT</button>
-      <button class="filter-btn" data-cat="analytics">Analytics</button>
-      <button class="filter-btn" data-cat="utility">Utility</button>
+<!-- Register Modal -->
+<div class="modal" id="modal">
+    <div class="modal-box">
+        <div class="modal-title">Register New Agent</div>
+        <div class="form-row">
+            <div class="form-group"><label>Name *</label><input id="reg-name" type="text" placeholder="My Agent"></div>
+            <div class="form-group"><label>Version</label><input id="reg-version" type="text" placeholder="1.0.0"></div>
+        </div>
+        <div class="form-group"><label>Description *</label><textarea id="reg-description" rows="3" placeholder="What does your agent do?"></textarea></div>
+        <div class="form-row">
+            <div class="form-group"><label>Category</label>
+                <select id="reg-category">
+                    <option value="other">Other</option>
+                    <option value="framework">Framework</option>
+                    <option value="trading">Trading</option>
+                    <option value="defi">DeFi</option>
+                    <option value="nft">NFT</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="utility">Utility</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Tags (comma separated)</label><input id="reg-tags" type="text" placeholder="solana, defi, open-source"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Website</label><input id="reg-website" type="text" placeholder="https://..."></div>
+            <div class="form-group"><label>GitHub</label><input id="reg-github" type="text" placeholder="https://github.com/..."></div>
+        </div>
+        <div class="form-group"><label>Twitter</label><input id="reg-twitter" type="text" placeholder="https://twitter.com/..."></div>
+        <div class="form-group"><label>Capabilities (comma separated)</label><input id="reg-capabilities" type="text" placeholder="Token Swaps, NFT Minting, ..."></div>
+        <div id="register-result"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="close-modal">Cancel</button>
+            <button class="btn-primary" id="submit-register">Register</button>
+        </div>
     </div>
-    <button class="register-btn" id="open-register">+ Register Agent</button>
-  </div>
-
-  <div class="grid" id="grid">
-    <div class="loading">Loading agents…</div>
-  </div>
-</main>
-
-<!-- ── Register Modal ─────────────────────────────────────────────────── -->
-<div class="modal-overlay" id="modal">
-  <div class="modal">
-    <h2>Register Your Agent</h2>
-    <p>Add your Solana agent to the open registry. No approval needed.</p>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Name *</label>
-        <input id="reg-name" type="text" placeholder="My Solana Agent" />
-      </div>
-      <div class="form-group">
-        <label>Version</label>
-        <input id="reg-version" type="text" placeholder="1.0.0" />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Description *</label>
-      <textarea id="reg-description" rows="3" placeholder="What does your agent do?"></textarea>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Category</label>
-        <select id="reg-category">
-          <option value="other">Other</option>
-          <option value="framework">Framework</option>
-          <option value="trading">Trading</option>
-          <option value="defi">DeFi</option>
-          <option value="nft">NFT</option>
-          <option value="analytics">Analytics</option>
-          <option value="utility">Utility</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Tags (comma separated)</label>
-        <input id="reg-tags" type="text" placeholder="solana, defi, open-source" />
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Website</label>
-        <input id="reg-website" type="text" placeholder="https://..." />
-      </div>
-      <div class="form-group">
-        <label>GitHub</label>
-        <input id="reg-github" type="text" placeholder="https://github.com/..." />
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Twitter</label>
-      <input id="reg-twitter" type="text" placeholder="https://twitter.com/..." />
-    </div>
-    <div class="form-group">
-      <label>Capabilities (comma separated)</label>
-      <input id="reg-capabilities" type="text" placeholder="Token Swaps, NFT Minting, ..." />
-    </div>
-    <div id="register-result"></div>
-    <div class="modal-actions">
-      <button class="btn-cancel" id="close-modal">Cancel</button>
-      <button class="btn-primary" id="submit-register">Register</button>
-    </div>
-  </div>
 </div>
 
 <script>
-// ── Helpers ────────────────────────────────────────────────────────────
+const sp = document.getElementById('sp');
+window.addEventListener('scroll', () => {
+    sp.style.width = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
+}, {passive:true});
+const ro = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }), {threshold:0.05,rootMargin:'-10px'});
+document.querySelectorAll('.rv').forEach(el => ro.observe(el));
 
 const CATEGORY_COLORS = {
-  framework: '#9945ff', trading: '#ffa502', defi: '#2ed573',
-  nft: '#ff6b81', analytics: '#1e90ff', utility: '#eccc68', other: '#747d8c'
+    framework:'#9945ff',trading:'#ffa502',defi:'#2ed573',nft:'#ff6b81',analytics:'#1e90ff',utility:'#eccc68',other:'#747d8c'
 };
 
 function catBadge(cat) {
-  return `<span class="cat-badge cat-${cat || 'other'}">${cat || 'other'}</span>`;
+    return '<span class="cat-badge cat-'+(cat||'other')+'">'+(cat||'other')+'</span>';
 }
 
 function avatar(name, cat) {
-  const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-  const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.other;
-  return `<div class="card-avatar" style="background:linear-gradient(135deg,${color}99,${color}33)">${initials}</div>`;
+    const initials = name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const color = CATEGORY_COLORS[cat] || CATEGORY_COLORS.other;
+    return '<div class="card-avatar" style="background:linear-gradient(135deg,'+color+'99,'+color+'33)">'+initials+'</div>';
 }
 
 function humanNum(n) {
-  if (n >= 1e6) return (n / 1e6).toFixed(1) + 'M';
-  if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
-  return n.toString();
+    if (n >= 1e6) return (n/1e6).toFixed(1)+'M';
+    if (n >= 1e3) return (n/1e3).toFixed(1)+'K';
+    return n.toString();
 }
 
 function renderCard(agent) {
-  const tags = (agent.tags || []).slice(0, 4).map(t => `<span class="tag">${t}</span>`).join('');
-  const svgGlobe = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20"/></svg>`;
-  const svgGit  = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="6" y1="9" x2="6" y2="15"/><path d="M18 15V9a3 3 0 0 0-3-3H9"/></svg>`;
-  const svgX    = `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16M4 20L20 4"/></svg>`;
-  const links = [
-    agent.website ? `<a class="card-link" href="${agent.website}" target="_blank">${svgGlobe} Website</a>` : '',
-    agent.github  ? `<a class="card-link" href="${agent.github}"  target="_blank">${svgGit} GitHub</a>` : '',
-    agent.twitter ? `<a class="card-link" href="${agent.twitter}" target="_blank">${svgX} Twitter</a>` : '',
-  ].filter(Boolean).join('');
+    const tags = (agent.tags||[]).slice(0,4).map(t => '<span class="tag">'+t+'</span>').join('');
+    const svgGlobe = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 0 20M12 2a15.3 15.3 0 0 0 0 20"/></svg>';
+    const svgGit  = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="6" y1="9" x2="6" y2="15"/><path d="M18 15V9a3 3 0 0 0-3-3H9"/></svg>';
+    const svgX    = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4l16 16M4 20L20 4"/></svg>';
+    const links = [
+        agent.website ? '<a class="card-link" href="'+agent.website+'" target="_blank">'+svgGlobe+' Website</a>' : '',
+        agent.github  ? '<a class="card-link" href="'+agent.github+'" target="_blank">'+svgGit+' GitHub</a>' : '',
+        agent.twitter ? '<a class="card-link" href="'+agent.twitter+'" target="_blank">'+svgX+' Twitter</a>' : '',
+    ].filter(Boolean).join('');
 
-  // Live data pills
-  const live = agent.liveData;
-  let livePills = '';
-  if (live) {
-    if (live.githubStars != null) {
-      livePills += `<span class="live-pill"><span class="live-dot"></span>${humanNum(live.githubStars)} stars</span>`;
+    const live = agent.liveData;
+    let livePills = '';
+    if (live) {
+        if (live.githubStars != null) livePills += '<span class="live-pill"><span class="live-dot"></span>'+humanNum(live.githubStars)+' stars</span>';
+        if (live.githubCommits30d != null) livePills += '<span class="live-pill">'+live.githubCommits30d+' commits/30d</span>';
+        if (live.githubLastPush) {
+            const d = Math.floor((Date.now()-new Date(live.githubLastPush).getTime())/86400000);
+            livePills += '<span class="live-pill '+(d<=7?'up':'')+'">push '+d+'d ago</span>';
+        }
+        if (live.tokenPrice != null && live.tokenSymbol) {
+            const dir = live.tokenChange24h >= 0 ? 'up' : 'down';
+            const sign = live.tokenChange24h >= 0 ? '+' : '';
+            livePills += '<span class="live-pill '+dir+'">'+live.tokenSymbol+' $'+(live.tokenPrice < 0.001 ? live.tokenPrice.toExponential(2) : live.tokenPrice.toFixed(4))+' ('+sign+(live.tokenChange24h?.toFixed(1)||'0')+'%)</span>';
+        }
     }
-    if (live.githubCommits30d != null) {
-      livePills += `<span class="live-pill">${live.githubCommits30d} commits/30d</span>`;
-    }
-    if (live.githubLastPush) {
-      const daysAgo = Math.floor((Date.now() - new Date(live.githubLastPush).getTime()) / 86400000);
-      const pushClass = daysAgo <= 7 ? 'up' : '';
-      livePills += `<span class="live-pill ${pushClass}">push ${daysAgo}d ago</span>`;
-    }
-    if (live.tokenPrice != null && live.tokenSymbol) {
-      const dir = live.tokenChange24h >= 0 ? 'up' : 'down';
-      const sign = live.tokenChange24h >= 0 ? '+' : '';
-      livePills += `<span class="live-pill ${dir}">${live.tokenSymbol} $${live.tokenPrice < 0.001 ? live.tokenPrice.toExponential(2) : live.tokenPrice.toFixed(4)} (${sign}${live.tokenChange24h?.toFixed(1)}%)</span>`;
-    }
-  }
 
-  return `
-    <div class="card" data-id="${agent.id}">
-      <div class="card-header">
-        ${avatar(agent.name, agent.category)}
-        <div class="card-meta">
-          <div class="card-name">${agent.name}</div>
-          <div class="card-version">v${agent.version}</div>
-          ${catBadge(agent.category)}
-        </div>
-      </div>
-      <p class="card-desc">${agent.description}</p>
-      <div class="rep-row">
-        <span class="rep-label">Reputation</span>
-        <div class="rep-bar-bg"><div class="rep-bar-fill" data-rep="${agent.reputation}"></div></div>
-        <span class="rep-num">${agent.reputation}</span>
-      </div>
-      <div class="mini-stats">
-        <div class="mini-stat">
-          <div class="mini-stat-num">${humanNum(agent.tasksCompleted)}</div>
-          <div class="mini-stat-label">Tasks</div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-stat-num">${agent.successRate?.toFixed(1)}%</div>
-          <div class="mini-stat-label">Success</div>
-        </div>
-        <div class="mini-stat">
-          <div class="mini-stat-num">${(agent.capabilities || []).length}</div>
-          <div class="mini-stat-label">Skills</div>
-        </div>
-      </div>
-      ${tags ? `<div class="tags">${tags}</div>` : ''}
-      ${livePills ? `<div class="live-strip">${livePills}</div>` : ''}
-      ${links ? `<div class="card-links">${links}</div>` : ''}
-    </div>
-  `;
+    return '<div class="card" data-id="'+agent.id+'">' +
+        '<div class="card-header">'+avatar(agent.name,agent.category)+'<div class="card-meta"><div class="card-name">'+agent.name+'</div><div class="card-version">v'+agent.version+'</div>'+catBadge(agent.category)+'</div></div>' +
+        '<p class="card-desc">'+agent.description+'</p>' +
+        '<div class="rep-row"><span class="rep-label">Reputation</span><div class="rep-bar-bg"><div class="rep-bar-fill" data-rep="'+agent.reputation+'"></div></div><span class="rep-num">'+agent.reputation+'</span></div>' +
+        '<div class="mini-stats"><div class="mini-stat"><div class="mini-stat-num">'+humanNum(agent.tasksCompleted)+'</div><div class="mini-stat-label">Tasks</div></div><div class="mini-stat"><div class="mini-stat-num">'+(agent.successRate?.toFixed(1)||'0')+'%</div><div class="mini-stat-label">Success</div></div><div class="mini-stat"><div class="mini-stat-num">'+((agent.capabilities||[]).length)+'</div><div class="mini-stat-label">Skills</div></div></div>' +
+        (tags ? '<div class="tags">'+tags+'</div>' : '') +
+        (livePills ? '<div class="live-strip">'+livePills+'</div>' : '') +
+        (links ? '<div class="card-links">'+links+'</div>' : '') +
+        '</div>';
 }
 
-// ── State ──────────────────────────────────────────────────────────────
 let allAgents = [];
 let activeCategory = '';
 let searchQuery = '';
 
 function applyFilters() {
-  let agents = allAgents;
-  if (activeCategory) agents = agents.filter(a => a.category === activeCategory);
-  if (searchQuery) {
-    const q = searchQuery.toLowerCase();
-    agents = agents.filter(a =>
-      a.name.toLowerCase().includes(q) ||
-      a.description.toLowerCase().includes(q) ||
-      (a.tags || []).some(t => t.toLowerCase().includes(q))
-    );
-  }
-
-  const grid = document.getElementById('grid');
-  if (!agents.length) {
-    grid.innerHTML = '<div class="empty">No agents found. Try a different filter.</div>';
-    return;
-  }
-  grid.innerHTML = agents.map(renderCard).join('');
-
-  // Animate reputation bars
-  requestAnimationFrame(() => {
-    document.querySelectorAll('.rep-bar-fill').forEach(el => {
-      el.style.width = el.dataset.rep + '%';
-    });
-  });
-}
-
-// ── Fetch ──────────────────────────────────────────────────────────────
-async function fetchAgents() {
-  try {
-    const [agentsRes, statsRes] = await Promise.all([
-      fetch('/api/registry/agents'),
-      fetch('/api/registry/stats')
-    ]);
-    const { agents } = await agentsRes.json();
-    const stats = await statsRes.json();
-
-    allAgents = agents || [];
-
-    document.getElementById('stat-total').textContent = stats.totalAgents ?? allAgents.length;
-    document.getElementById('stat-avg-rep').textContent = stats.averageReputation ?? '–';
-    document.getElementById('stat-top').textContent = stats.topAgent ?? '–';
-    document.getElementById('stat-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
-
-    applyFilters();
-  } catch (err) {
-    document.getElementById('grid').innerHTML = `<div class="empty">Failed to load: ${err.message}</div>`;
-  }
-}
-
-// ── Filters ────────────────────────────────────────────────────────────
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    activeCategory = btn.dataset.cat;
-    applyFilters();
-  });
-});
-
-document.getElementById('search').addEventListener('input', e => {
-  searchQuery = e.target.value.trim();
-  applyFilters();
-});
-
-// ── Modal ──────────────────────────────────────────────────────────────
-document.getElementById('open-register').addEventListener('click', () => {
-  document.getElementById('modal').classList.add('open');
-});
-document.getElementById('close-modal').addEventListener('click', () => {
-  document.getElementById('modal').classList.remove('open');
-});
-document.getElementById('modal').addEventListener('click', e => {
-  if (e.target === document.getElementById('modal'))
-    document.getElementById('modal').classList.remove('open');
-});
-
-document.getElementById('submit-register').addEventListener('click', async () => {
-  const name = document.getElementById('reg-name').value.trim();
-  const description = document.getElementById('reg-description').value.trim();
-  if (!name || !description) {
-    showResult('Name and description are required.', false);
-    return;
-  }
-  const body = {
-    name,
-    description,
-    version: document.getElementById('reg-version').value.trim() || '1.0.0',
-    category: document.getElementById('reg-category').value,
-    website: document.getElementById('reg-website').value.trim() || undefined,
-    github:  document.getElementById('reg-github').value.trim()  || undefined,
-    twitter: document.getElementById('reg-twitter').value.trim() || undefined,
-    tags: document.getElementById('reg-tags').value.split(',').map(t => t.trim()).filter(Boolean),
-    capabilities: document.getElementById('reg-capabilities').value.split(',').map(c => c.trim()).filter(Boolean),
-  };
-  try {
-    const res = await fetch('/api/registry/register', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    const data = await res.json();
-    if (res.ok) {
-      showResult(`Registered. Agent ID: ${data.id}`, true);
-      fetchAgents();
-    } else {
-      showResult(data.error || 'Registration failed', false);
+    let agents = allAgents;
+    if (activeCategory) agents = agents.filter(a => a.category === activeCategory);
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        agents = agents.filter(a => a.name.toLowerCase().includes(q) || a.description.toLowerCase().includes(q) || (a.tags||[]).some(t => t.toLowerCase().includes(q)));
     }
-  } catch (err) {
-    showResult('Network error: ' + err.message, false);
-  }
+    const grid = document.getElementById('grid');
+    if (!agents.length) { grid.innerHTML = '<div class="empty">No agents found. Try a different filter.</div>'; return; }
+    grid.innerHTML = agents.map(renderCard).join('');
+    requestAnimationFrame(() => {
+        document.querySelectorAll('.rep-bar-fill').forEach(el => { el.style.width = el.dataset.rep + '%'; });
+    });
+}
+
+async function fetchAgents() {
+    try {
+        const [agentsRes, statsRes] = await Promise.all([fetch('/api/registry/agents'), fetch('/api/registry/stats')]);
+        const { agents } = await agentsRes.json();
+        const stats = await statsRes.json();
+        allAgents = agents || [];
+        document.getElementById('stat-total').textContent   = stats.totalAgents ?? allAgents.length;
+        document.getElementById('stat-avg-rep').textContent = stats.averageReputation ?? '–';
+        document.getElementById('stat-top').textContent     = stats.topAgent ?? '–';
+        document.getElementById('stat-updated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+        applyFilters();
+    } catch(err) {
+        document.getElementById('grid').innerHTML = '<div class="empty">Failed to load: '+err.message+'</div>';
+    }
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategory = btn.dataset.cat;
+        applyFilters();
+    });
 });
+document.getElementById('search').addEventListener('input', e => { searchQuery = e.target.value.trim(); applyFilters(); });
+document.getElementById('open-register').addEventListener('click',  () => document.getElementById('modal').classList.add('open'));
+document.getElementById('close-modal').addEventListener('click',    () => document.getElementById('modal').classList.remove('open'));
+document.getElementById('modal').addEventListener('click', e => { if (e.target === document.getElementById('modal')) document.getElementById('modal').classList.remove('open'); });
 
 function showResult(msg, ok) {
-  const el = document.getElementById('register-result');
-  el.textContent = msg;
-  el.className = ok ? 'ok' : 'err';
-  el.style.display = 'block';
+    const el = document.getElementById('register-result');
+    el.innerHTML = '<div class="'+(ok?'result-ok':'result-err')+'">'+msg+'</div>';
 }
 
-// ── Crawler status ─────────────────────────────────────────────────────
-async function fetchCrawlerStatus() {
-  try {
-    const s = await fetch('/api/registry/crawler').then(r => r.json());
-    const bar = document.getElementById('crawler-bar');
-    const label = document.getElementById('crawler-status');
-    if (s.running) {
-      bar.classList.add('active');
-      const last = s.lastRun ? new Date(s.lastRun).toLocaleTimeString() : '—';
-      const next = s.nextRun ? new Date(s.nextRun).toLocaleTimeString() : '—';
-      label.textContent = `Crawler: LIVE · last run ${last} · next ${next} · ${s.totalCrawled} agents updated`;
-    } else {
-      bar.classList.remove('active');
-      label.textContent = 'Crawler: idle';
+document.getElementById('submit-register').addEventListener('click', async () => {
+    const name = document.getElementById('reg-name').value.trim();
+    const description = document.getElementById('reg-description').value.trim();
+    if (!name || !description) { showResult('Name and description are required.', false); return; }
+    const body = {
+        name, description,
+        version:      document.getElementById('reg-version').value.trim() || '1.0.0',
+        category:     document.getElementById('reg-category').value,
+        website:      document.getElementById('reg-website').value.trim()  || undefined,
+        github:       document.getElementById('reg-github').value.trim()   || undefined,
+        twitter:      document.getElementById('reg-twitter').value.trim()  || undefined,
+        tags:         document.getElementById('reg-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+        capabilities: document.getElementById('reg-capabilities').value.split(',').map(c => c.trim()).filter(Boolean),
+    };
+    try {
+        const res = await fetch('/api/registry/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body) });
+        const data = await res.json();
+        if (data.success || data.id) {
+            showResult('Agent registered successfully! ID: '+(data.id||''), true);
+            await fetchAgents();
+        } else {
+            showResult(data.error || 'Registration failed', false);
+        }
+    } catch(err) {
+        showResult('Error: '+err.message, false);
     }
-  } catch { /* ignore */ }
-}
-
-document.getElementById('crawl-now').addEventListener('click', async () => {
-  document.getElementById('crawler-status').textContent = 'Crawler: running cycle…';
-  await fetch('/api/registry/crawler/run', { method: 'POST' });
-  setTimeout(() => { fetchAgents(); fetchCrawlerStatus(); }, 3000);
 });
 
-// ── Init ───────────────────────────────────────────────────────────────
 fetchAgents();
-fetchCrawlerStatus();
-// Auto-refresh every 5 min
-setInterval(() => { fetchAgents(); fetchCrawlerStatus(); }, 5 * 60 * 1000);
 </script>
 </body>
 </html>

@@ -6,640 +6,407 @@
     <title>ALM — Agent Profile</title>
     <link rel="icon" href="/logo.svg" type="image/svg+xml">
     <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
         :root {
-            --bg: #0a0a0a;
-            --bg-card: #111111;
-            --bg-dark: #0d0d0d;
-            --bg-hover: #1a1a1a;
-            --border: rgba(255,255,255,0.08);
-            --border-light: rgba(255,255,255,0.15);
-            --text: #f0f0f0;
-            --text-secondary: #a0a0a0;
-            --text-dim: #555;
-            --primary: #4a9eff;
-            --primary-dim: rgba(74,158,255,0.12);
-            --green: #22c55e;
-            --green-dim: rgba(34,197,94,0.15);
-            --red: #ef4444;
-            --red-dim: rgba(239,68,68,0.15);
-            --yellow: #f59e0b;
+            --accent:     #00d4ff;
+            --accent-2:   #7c3aed;
+            --bg:         #020206;
+            --bg-card:    rgba(255,255,255,0.025);
+            --bg-card-h:  rgba(255,255,255,0.05);
+            --text:       #f0f0f4;
+            --text-muted: rgba(240,240,244,0.5);
+            --text-dim:   rgba(240,240,244,0.22);
+            --border:     rgba(255,255,255,0.06);
+            --border-a:   rgba(0,212,255,0.18);
+            --green:      #22c55e;
+            --green-dim:  rgba(34,197,94,0.1);
+            --red:        #ef4444;
+            --red-dim:    rgba(239,68,68,0.1);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh; -webkit-font-smoothing: antialiased;
         }
 
-        /* Nav */
+        /* ── BG ── */
+        .orb { position: fixed; border-radius: 50%; filter: blur(140px); pointer-events: none; z-index: 0; }
+        .orb-1 { width:600px;height:600px; background:radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 70%); top:-200px;left:-150px; animation:o1 22s ease-in-out infinite; }
+        .orb-2 { width:400px;height:400px; background:radial-gradient(circle,rgba(124,58,237,0.045) 0%,transparent 70%); bottom:-80px;right:-80px; animation:o2 28s ease-in-out infinite; }
+        @keyframes o1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(50px,40px)} }
+        @keyframes o2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,-50px)} }
+        .grid-bg {
+            position:fixed;inset:0;z-index:0;pointer-events:none;
+            background-image:linear-gradient(rgba(0,212,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.02) 1px,transparent 1px);
+            background-size:80px 80px;
+            mask-image:radial-gradient(ellipse 80% 50% at 50% 0%,black 0%,transparent 100%);
+        }
+        .z1 { position:relative; z-index:1; }
+
+        /* ── NAV ── */
         nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 20px 48px;
+            position: sticky; top:0; z-index:100;
+            display:flex; align-items:center; justify-content:space-between;
+            padding: 0 72px; height: 64px;
+            background: rgba(2,2,6,0.82);
+            backdrop-filter: blur(28px) saturate(180%);
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
-            background: rgba(10,10,10,0.95);
-            backdrop-filter: blur(12px);
-            z-index: 10;
         }
-        .nav-logo {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
+        .nl { display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text); }
+        .nl img { width:28px;height:28px;border-radius:6px; }
+        .nl span { font-size:15px;font-weight:600;letter-spacing:-0.02em; }
+        .nr { display:flex; gap:4px; align-items:center; }
+        .nr a {
+            padding:6px 12px; color:var(--text-muted); text-decoration:none;
+            font-size:13px; font-weight:500; border-radius:7px;
+            transition:color 0.2s,background 0.2s;
         }
-        .nav-logo span { color: var(--primary); }
-        .nav-links { display: flex; gap: 24px; align-items: center; }
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.2s;
-        }
-        .nav-links a:hover { color: var(--text); }
-        .nav-badge {
-            background: var(--primary-dim);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+        .nr a:hover { color:var(--text); background:rgba(255,255,255,0.05); }
+        .nbadge {
+            padding:4px 11px; border-radius:100px;
+            background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.18);
+            font-size:10px; font-weight:700; letter-spacing:0.06em;
+            text-transform:uppercase; color:var(--accent);
         }
 
-        /* Layout */
-        .page { max-width: 960px; margin: 0 auto; padding: 48px 24px 80px; }
+        /* ── SCROLL PROGRESS ── */
+        #sp { position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;z-index:1000;box-shadow:0 0 10px var(--accent);transition:width 0.08s linear; }
 
-        /* Loading */
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 400px;
-            flex-direction: column;
-            gap: 16px;
-            color: var(--text-dim);
-        }
-        .spinner {
-            width: 32px; height: 32px;
-            border: 2px solid var(--border);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* ── LAYOUT ── */
+        .page { max-width:960px; margin:0 auto; padding:48px 24px 100px; }
 
-        /* Error */
-        .error-box {
-            background: var(--red-dim);
-            border: 1px solid var(--red);
-            border-radius: 10px;
-            padding: 24px;
-            text-align: center;
-            color: var(--red);
-        }
+        /* ── REVEAL ── */
+        .rv { opacity:0;transform:translateY(26px);transition:opacity 0.7s cubic-bezier(0.16,1,0.3,1),transform 0.7s cubic-bezier(0.16,1,0.3,1); }
+        .rv.vis { opacity:1;transform:translateY(0); }
+        .d1{transition-delay:.06s}.d2{transition-delay:.12s}.d3{transition-delay:.18s}.d4{transition-delay:.24s}
 
-        /* Profile header */
+        /* ── LOADING ── */
+        .loading { display:flex;align-items:center;justify-content:center;height:400px;flex-direction:column;gap:16px;color:var(--text-dim); }
+        .spinner { width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        /* ── ERROR ── */
+        .err { background:var(--red-dim);border:1px solid rgba(239,68,68,0.25);border-radius:14px;padding:28px;text-align:center;color:var(--red); }
+
+        /* ── PROFILE HEADER ── */
         .profile-header {
-            display: flex;
-            gap: 24px;
-            align-items: flex-start;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 24px;
+            display:flex;gap:24px;align-items:flex-start;
+            background:var(--bg-card);border:1px solid var(--border);border-radius:18px;
+            padding:32px;margin-bottom:20px;position:relative;overflow:hidden;
+        }
+        .profile-header::before {
+            content:'';position:absolute;top:0;left:0;right:0;height:1px;
+            background:linear-gradient(90deg,transparent,rgba(0,212,255,0.25),transparent);
         }
         .agent-avatar {
-            width: 72px; height: 72px;
-            border-radius: 16px;
-            background: var(--primary-dim);
-            border: 1px solid var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-            flex-shrink: 0;
+            width:68px;height:68px;border-radius:16px;
+            background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.22);
+            display:flex;align-items:center;justify-content:center;
+            font-size:26px;font-weight:700;color:var(--accent);flex-shrink:0;
+            box-shadow:0 0 28px rgba(0,212,255,0.15);
         }
-        .agent-meta { flex: 1; }
-        .agent-name {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            margin-bottom: 4px;
+        .agent-meta { flex:1; }
+        .agent-name { font-size:22px;font-weight:700;letter-spacing:-0.03em;margin-bottom:5px; }
+        .agent-desc { color:var(--text-muted);font-size:14px;margin-bottom:12px;max-width:480px;line-height:1.6; }
+        .agent-idtag {
+            font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--text-dim);
+            background:rgba(0,0,0,0.4);padding:4px 10px;border-radius:5px;
+            border:1px solid var(--border);display:inline-block;
         }
-        .agent-desc {
-            color: var(--text-secondary);
-            font-size: 14px;
-            margin-bottom: 12px;
-            max-width: 500px;
-        }
-        .agent-id {
-            font-family: monospace;
-            font-size: 11px;
-            color: var(--text-dim);
-            background: var(--bg-dark);
-            padding: 4px 10px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-        .header-right {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 10px;
-        }
-        .status-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .header-right { display:flex;flex-direction:column;align-items:flex-end;gap:10px; }
         .status-active {
-            background: var(--green-dim);
-            color: var(--green);
+            padding:5px 14px;border-radius:100px;
+            background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);
+            font-size:12px;font-weight:600;color:var(--green);
+            display:flex;align-items:center;gap:6px;
         }
-        .version-tag {
-            font-size: 12px;
-            color: var(--text-dim);
-        }
+        .status-dot { width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pdot 2s infinite; }
+        @keyframes pdot { 0%,100%{opacity:1} 50%{opacity:0.3} }
+        .ver { font-size:12px;color:var(--text-dim); }
 
-        /* Grid */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        @media (max-width: 640px) {
-            .grid-2 { grid-template-columns: 1fr; }
-            nav { padding: 16px 20px; }
-            .profile-header { flex-direction: column; }
-            .header-right { align-items: flex-start; }
-        }
+        /* ── GRID ── */
+        .g2 { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+        @media(max-width:640px){ .g2{grid-template-columns:1fr} nav{padding:0 20px} .profile-header{flex-direction:column} .header-right{align-items:flex-start} }
 
-        /* Card */
+        /* ── CARD ── */
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
+            background:var(--bg-card);border:1px solid var(--border);border-radius:14px;
+            padding:24px;position:relative;overflow:hidden;
+            transition:background 0.3s,border-color 0.3s;
         }
-        .card-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-dim);
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
+        .card:hover { background:var(--bg-card-h);border-color:rgba(255,255,255,0.1); }
+        .card-title { font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-dim);font-weight:600;margin-bottom:18px; }
 
-        /* Reputation */
+        /* ── REPUTATION ── */
         .rep-score {
-            font-size: 48px;
-            font-weight: 800;
-            letter-spacing: -2px;
-            line-height: 1;
-            margin-bottom: 8px;
+            font-size:52px;font-weight:800;letter-spacing:-0.04em;line-height:1;margin-bottom:6px;
+            background:linear-gradient(135deg,#fff 0%,var(--accent) 100%);
+            -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
         }
-        .rep-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
-        .rep-bar {
-            height: 6px;
-            background: var(--bg-dark);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 20px;
-        }
-        .rep-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary), #7bc8ff);
-            border-radius: 3px;
-            transition: width 1s cubic-bezier(0.4,0,0.2,1);
-            width: 0%;
-        }
-        .rep-stats {
-            display: flex;
-            gap: 20px;
-        }
-        .rep-stat { text-align: center; }
-        .rep-stat-value {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-        }
-        .rep-stat-label {
-            font-size: 11px;
-            color: var(--text-dim);
-            margin-top: 2px;
-        }
+        .rep-label { font-size:13px;color:var(--text-muted);margin-bottom:16px; }
+        .rep-bar { height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden;margin-bottom:20px; }
+        .rep-bar-fill { height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:2px;transition:width 1.2s cubic-bezier(0.4,0,0.2,1);width:0%;box-shadow:0 0 10px rgba(0,212,255,0.4); }
+        .rep-stats { display:flex;gap:24px; }
+        .rep-stat { text-align:center; }
+        .rsv { font-size:20px;font-weight:700;letter-spacing:-0.02em; }
+        .rsl { font-size:10px;color:var(--text-dim);margin-top:2px;text-transform:uppercase;letter-spacing:0.06em; }
 
-        /* Stats */
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-        .stat-item:last-child { border-bottom: none; }
-        .stat-item-label { color: var(--text-secondary); }
-        .stat-item-value { font-weight: 600; }
+        /* ── STAT LIST ── */
+        .si { display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px; }
+        .si:last-child { border-bottom:none; }
+        .sil { color:var(--text-muted); }
+        .siv { font-weight:600; }
 
-        /* Capabilities */
-        .caps-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
+        /* ── CAPS ── */
+        .caps-grid { display:flex;flex-wrap:wrap;gap:8px; }
+        .cap {
+            padding:5px 12px;border-radius:7px;font-size:12px;font-weight:500;
+            background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--text-muted);
+            display:flex;align-items:center;gap:6px;transition:all 0.2s;
         }
-        .cap-badge {
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 500;
-            background: var(--bg-dark);
-            border: 1px solid var(--border);
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+        .cap.on {
+            background:rgba(0,212,255,0.07);border-color:rgba(0,212,255,0.2);color:var(--accent);
         }
-        .cap-badge.enabled {
-            background: var(--primary-dim);
-            border-color: rgba(74,158,255,0.25);
-            color: var(--primary);
-        }
-        .cap-dot {
-            width: 6px; height: 6px;
-            border-radius: 50%;
-            background: currentColor;
-            opacity: 0.7;
-        }
+        .cap-dot { width:5px;height:5px;border-radius:50%;background:currentColor;opacity:0.8; }
 
-        /* Skills */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-        @media (max-width: 640px) { .skills-grid { grid-template-columns: 1fr; } }
+        /* ── SKILLS ── */
+        .skills-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px; }
+        @media(max-width:640px){ .skills-grid{grid-template-columns:1fr} }
         .skill-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 16px;
-            transition: border-color 0.2s;
+            background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;
+            transition:border-color 0.2s,background 0.2s;cursor:default;
         }
-        .skill-card:hover { border-color: var(--border-light); }
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
+        .skill-card:hover { border-color:var(--border-a);background:var(--bg-card-h); }
+        .skill-card:hover .skill-name { color:var(--accent); }
+        .sk-head { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+        .skill-name { font-size:14px;font-weight:600;letter-spacing:-0.01em;transition:color 0.2s; }
+        .skill-uses {
+            font-size:10px;color:var(--text-dim);background:rgba(255,255,255,0.04);
+            padding:2px 8px;border-radius:100px;border:1px solid var(--border);
         }
-        .skill-name { font-size: 14px; font-weight: 600; }
-        .skill-usage {
-            font-size: 11px;
-            color: var(--text-dim);
-            background: var(--bg-dark);
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
-        .skill-desc { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
-        .skill-category {
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--primary);
-            opacity: 0.7;
-        }
+        .skill-desc { font-size:12px;color:var(--text-muted);margin-bottom:8px;line-height:1.6; }
+        .skill-cat { font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);opacity:0.7; }
 
-        /* Tasks */
-        .tasks-section { margin-bottom: 24px; }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-        .task-count {
-            font-size: 12px;
-            color: var(--text-dim);
-        }
-        .tasks-list { display: flex; flex-direction: column; gap: 8px; }
+        /* ── SECTION HEADER ── */
+        .sh { display:flex;justify-content:space-between;align-items:center;margin-bottom:14px; }
+        .sh-title { font-size:15px;font-weight:600;letter-spacing:-0.02em; }
+        .sh-count { font-size:12px;color:var(--text-dim); }
+
+        /* ── TASKS ── */
+        .tasks-list { display:flex;flex-direction:column;gap:8px; }
         .task-item {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            transition: border-color 0.2s;
+            background:var(--bg-card);border:1px solid var(--border);border-radius:10px;
+            padding:13px 16px;display:flex;align-items:center;gap:13px;
+            transition:border-color 0.2s,background 0.2s;
         }
-        .task-item:hover { border-color: var(--border-light); }
-        .task-icon {
-            width: 32px; height: 32px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .task-icon.success { background: var(--green-dim); }
-        .task-icon.failed { background: var(--red-dim); }
-        .task-icon.pending { background: var(--bg-dark); }
-        .task-body { flex: 1; min-width: 0; }
-        .task-desc {
-            font-size: 13px;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .task-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-        .task-status {
-            font-size: 11px;
-            font-weight: 600;
-            padding: 3px 10px;
-            border-radius: 10px;
-            flex-shrink: 0;
-        }
-        .task-status.success { background: var(--green-dim); color: var(--green); }
-        .task-status.failed { background: var(--red-dim); color: var(--red); }
-        .task-status.running { background: var(--primary-dim); color: var(--primary); }
-        .task-status.pending { background: var(--bg-dark); color: var(--text-dim); }
+        .task-item:hover { border-color:rgba(255,255,255,0.1);background:var(--bg-card-h); }
+        .task-icon { width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0; }
+        .task-icon.success { background:var(--green-dim);color:var(--green); }
+        .task-icon.failed  { background:var(--red-dim);color:var(--red); }
+        .task-icon.running { background:rgba(0,212,255,0.08);color:var(--accent); }
+        .task-icon.pending { background:rgba(255,255,255,0.03);color:var(--text-dim); }
+        .task-body { flex:1;min-width:0; }
+        .task-desc { font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+        .task-meta { font-size:11px;color:var(--text-dim);margin-top:2px; }
+        .task-status { font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;flex-shrink:0; }
+        .task-status.success { background:var(--green-dim);color:var(--green); }
+        .task-status.failed  { background:var(--red-dim);color:var(--red); }
+        .task-status.running { background:rgba(0,212,255,0.08);color:var(--accent); }
+        .task-status.pending { background:rgba(255,255,255,0.03);color:var(--text-dim); }
 
-        /* Empty state */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-dim);
-            font-size: 13px;
-        }
+        /* ── EMPTY ── */
+        .empty { text-align:center;padding:40px 20px;color:var(--text-dim);font-size:13px; }
 
-        /* Footer */
-        .page-footer {
-            text-align: center;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
-            color: var(--text-dim);
-            font-size: 12px;
-        }
-        .page-footer a {
-            color: var(--primary);
-            text-decoration: none;
-        }
+        /* ── FOOTER ── */
+        .pf { text-align:center;padding:40px 0 0;border-top:1px solid var(--border);color:var(--text-dim);font-size:12px; }
+        .pf a { color:var(--accent);text-decoration:none; }
+        .pf a:hover { text-decoration:underline; }
     </style>
 </head>
 <body>
+<div id="sp"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="grid-bg"></div>
 
-<nav>
-    <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;">
-      <img src="/logo.svg" alt="ALM" style="width:32px;height:32px;border-radius:7px;">
-      <span class="nav-logo" style="margin:0;">ALM</span>
+<nav class="z1">
+    <a class="nl" href="/">
+        <img src="/logo.svg" alt="ALM">
+        <span>ALM</span>
     </a>
-    <div class="nav-links">
+    <div class="nr">
         <a href="/">Chat</a>
         <a href="/registry">Registry</a>
         <a href="/manifest">Manifest</a>
         <a href="https://github.com/ALM-AI552/alm-agent" target="_blank">GitHub</a>
-        <span class="nav-badge">SAP v1</span>
+        <span class="nbadge">SAP v1</span>
     </div>
 </nav>
 
-<div class="page">
+<div class="page z1">
     <div id="content">
-        <div class="loading" id="loading">
+        <div class="loading">
             <div class="spinner"></div>
-            <span>Loading agent profile...</span>
+            <span style="font-size:13px">Loading agent profile...</span>
         </div>
     </div>
 </div>
 
 <script>
-async function loadAgent() {
-    try {
-        const [agentRes, tasksRes] = await Promise.all([
-            fetch('/api/agent'),
-            fetch('/api/agent/tasks')
-        ]);
+// Scroll progress
+const sp = document.getElementById('sp');
+window.addEventListener('scroll', () => {
+    sp.style.width = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100) + '%';
+}, { passive:true });
 
-        const agentData = await agentRes.json();
-        const tasksData = await tasksRes.json();
-
-        if (agentData.error) throw new Error(agentData.error);
-
-        render(agentData, tasksData.tasks || []);
-    } catch (err) {
-        document.getElementById('content').innerHTML = `
-            <div class="error-box">
-                <div style="font-size:24px;margin-bottom:8px">⚠️</div>
-                <div style="font-weight:600;margin-bottom:4px">Failed to load agent</div>
-                <div style="font-size:13px;opacity:0.8">${err.message}</div>
-            </div>`;
-    }
-}
+// Reveal
+const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+}, { threshold:0.06, rootMargin:'-20px' });
 
 function timeAgo(date) {
-    const d = new Date(date);
-    const now = Date.now();
-    const diff = Math.floor((now - d.getTime()) / 1000);
-    if (diff < 60) return `${diff}s ago`;
-    if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
-    return d.toLocaleDateString();
+    const diff = Math.floor((Date.now() - new Date(date)) / 1000);
+    if (diff < 60) return diff + 's ago';
+    if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+    if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+    return new Date(date).toLocaleDateString();
 }
 
-function taskIcon(status) {
-    if (status === 'completed') return '✓';
-    if (status === 'failed') return '✕';
-    if (status === 'running') return '⟳';
+function taskIcon(s) {
+    if (s === 'completed') return '✓';
+    if (s === 'failed') return '✕';
+    if (s === 'running') return '⟳';
     return '○';
 }
 
-function skillLabel(skillId, skills) {
-    const s = skills.find(x => x.id === skillId);
-    return s ? s.name : skillId.substring(0, 8) + '…';
+function skillLabel(id, skills) {
+    const s = skills.find(x => x.id === id);
+    return s ? s.name : id.substring(0,8) + '…';
 }
 
 function render(data, tasks) {
     const { profile, stats, skills } = data;
     const rep = profile.reputation || 0;
-    const successRate = profile.successRate || 100;
-    const initial = (profile.name || 'A').charAt(0).toUpperCase();
+    const sr  = profile.successRate || 100;
+    const ini = (profile.name || 'A').charAt(0).toUpperCase();
 
-    const capsBadges = (profile.capabilities || []).map(c => `
-        <div class="cap-badge ${c.enabled ? 'enabled' : ''}">
-            <div class="cap-dot"></div>
-            ${c.name}
-        </div>`).join('');
+    const caps = (profile.capabilities || []).map(c =>
+        '<div class="cap ' + (c.enabled ? 'on' : '') + '"><div class="cap-dot"></div>' + c.name + '</div>'
+    ).join('');
 
-    const skillCards = (skills || []).map(s => `
-        <div class="skill-card">
-            <div class="skill-header">
-                <div class="skill-name">${s.name}</div>
-                <div class="skill-usage">${s.usageCount} uses</div>
-            </div>
-            <div class="skill-desc">${s.description}</div>
-            <div class="skill-category">${s.category}</div>
-        </div>`).join('');
+    const sks = (skills || []).map(s =>
+        '<div class="skill-card rv">' +
+        '<div class="sk-head"><div class="skill-name">' + s.name + '</div><div class="skill-uses">' + s.usageCount + ' uses</div></div>' +
+        '<div class="skill-desc">' + s.description + '</div>' +
+        '<div class="skill-cat">' + s.category + '</div>' +
+        '</div>'
+    ).join('');
 
-    const taskItems = tasks.length === 0
-        ? `<div class="empty-state">No tasks recorded yet.<br>Start using the agent — tasks will appear here.</div>`
+    const tItems = tasks.length === 0
+        ? '<div class="empty">No tasks recorded yet.<br>Start using the agent — tasks will appear here.</div>'
         : tasks.map(t => {
-            const statusClass = t.status === 'completed' ? 'success' : t.status === 'failed' ? 'failed' : t.status;
-            const skillName = skillLabel(t.skillId, skills);
-            return `
-            <div class="task-item">
-                <div class="task-icon ${statusClass}">${taskIcon(t.status)}</div>
-                <div class="task-body">
-                    <div class="task-desc">${t.description || '(no description)'}</div>
-                    <div class="task-meta">${skillName} · ${timeAgo(t.createdAt)}</div>
-                </div>
-                <div class="task-status ${statusClass}">${t.status}</div>
-            </div>`;
+            const sc = t.status === 'completed' ? 'success' : t.status === 'failed' ? 'failed' : t.status;
+            return '<div class="task-item rv">' +
+                '<div class="task-icon ' + sc + '">' + taskIcon(t.status) + '</div>' +
+                '<div class="task-body">' +
+                '<div class="task-desc">' + (t.description || '(no description)') + '</div>' +
+                '<div class="task-meta">' + skillLabel(t.skillId, skills) + ' · ' + timeAgo(t.createdAt) + '</div>' +
+                '</div>' +
+                '<div class="task-status ' + sc + '">' + t.status + '</div>' +
+                '</div>';
         }).join('');
 
-    document.getElementById('content').innerHTML = `
-        <!-- Profile header -->
-        <div class="profile-header">
-            <div class="agent-avatar">${initial}</div>
-            <div class="agent-meta">
-                <div class="agent-name">${profile.name}</div>
-                <div class="agent-desc">${profile.description}</div>
-                <div class="agent-id">ID: ${profile.id}</div>
-            </div>
-            <div class="header-right">
-                <div class="status-badge status-active">● Active</div>
-                <div class="version-tag">v${profile.version}</div>
-            </div>
-        </div>
+    document.getElementById('content').innerHTML =
+        '<div class="profile-header rv">' +
+        '<div class="agent-avatar">' + ini + '</div>' +
+        '<div class="agent-meta">' +
+        '<div class="agent-name">' + profile.name + '</div>' +
+        '<div class="agent-desc">' + profile.description + '</div>' +
+        '<div class="agent-idtag">ID: ' + profile.id + '</div>' +
+        '</div>' +
+        '<div class="header-right">' +
+        '<div class="status-active"><span class="status-dot"></span>Active</div>' +
+        '<div class="ver">v' + profile.version + '</div>' +
+        '</div></div>' +
 
-        <!-- Reputation + Stats -->
-        <div class="grid-2">
-            <div class="card">
-                <div class="card-title">Reputation</div>
-                <div class="rep-score" id="repScore">0</div>
-                <div class="rep-label">/ 100 reputation points</div>
-                <div class="rep-bar">
-                    <div class="rep-bar-fill" id="repBar"></div>
-                </div>
-                <div class="rep-stats">
-                    <div class="rep-stat">
-                        <div class="rep-stat-value">${profile.tasksCompleted || 0}</div>
-                        <div class="rep-stat-label">Tasks</div>
-                    </div>
-                    <div class="rep-stat">
-                        <div class="rep-stat-value">${successRate.toFixed(0)}%</div>
-                        <div class="rep-stat-label">Success</div>
-                    </div>
-                    <div class="rep-stat">
-                        <div class="rep-stat-value">${skills.length}</div>
-                        <div class="rep-stat-label">Skills</div>
-                    </div>
-                </div>
-            </div>
+        '<div class="g2">' +
+        '<div class="card rv d1">' +
+        '<div class="card-title">Reputation</div>' +
+        '<div class="rep-score" id="repScore">0</div>' +
+        '<div class="rep-label">/ 100 reputation points</div>' +
+        '<div class="rep-bar"><div class="rep-bar-fill" id="repBar"></div></div>' +
+        '<div class="rep-stats">' +
+        '<div class="rep-stat"><div class="rsv">' + (profile.tasksCompleted||0) + '</div><div class="rsl">Tasks</div></div>' +
+        '<div class="rep-stat"><div class="rsv">' + sr.toFixed(0) + '%</div><div class="rsl">Success</div></div>' +
+        '<div class="rep-stat"><div class="rsv">' + skills.length + '</div><div class="rsl">Skills</div></div>' +
+        '</div></div>' +
 
-            <div class="card">
-                <div class="card-title">Protocol Stats</div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Total agents</span>
-                    <span class="stat-item-value">${stats.totalAgents}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Total skills</span>
-                    <span class="stat-item-value">${stats.totalSkills}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Total tasks</span>
-                    <span class="stat-item-value">${stats.totalTasks}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Completed tasks</span>
-                    <span class="stat-item-value" style="color:var(--green)">${stats.completedTasks}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Avg reputation</span>
-                    <span class="stat-item-value">${stats.averageReputation.toFixed(1)}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-item-label">Created</span>
-                    <span class="stat-item-value">${new Date(profile.createdAt).toLocaleDateString()}</span>
-                </div>
-            </div>
-        </div>
+        '<div class="card rv d2">' +
+        '<div class="card-title">Protocol Stats</div>' +
+        '<div class="si"><span class="sil">Total agents</span><span class="siv">' + stats.totalAgents + '</span></div>' +
+        '<div class="si"><span class="sil">Total skills</span><span class="siv">' + stats.totalSkills + '</span></div>' +
+        '<div class="si"><span class="sil">Total tasks</span><span class="siv">' + stats.totalTasks + '</span></div>' +
+        '<div class="si"><span class="sil">Completed tasks</span><span class="siv" style="color:var(--green)">' + stats.completedTasks + '</span></div>' +
+        '<div class="si"><span class="sil">Avg reputation</span><span class="siv">' + stats.averageReputation.toFixed(1) + '</span></div>' +
+        '<div class="si"><span class="sil">Created</span><span class="siv">' + new Date(profile.createdAt).toLocaleDateString() + '</span></div>' +
+        '</div></div>' +
 
-        <!-- Capabilities -->
-        <div class="card" style="margin-bottom:24px">
-            <div class="card-title">Capabilities (${(profile.capabilities||[]).length})</div>
-            <div class="caps-grid">${capsBadges}</div>
-        </div>
+        '<div class="card rv d3" style="margin-bottom:16px">' +
+        '<div class="card-title">Capabilities (' + (profile.capabilities||[]).length + ')</div>' +
+        '<div class="caps-grid">' + caps + '</div>' +
+        '</div>' +
 
-        <!-- Skills -->
-        <div class="section-header">
-            <div class="section-title">Skills</div>
-            <div class="task-count">${skills.length} registered</div>
-        </div>
-        <div class="skills-grid">${skillCards || '<div class="empty-state">No skills registered</div>'}</div>
+        '<div class="sh rv"><div class="sh-title">Skills</div><div class="sh-count">' + skills.length + ' registered</div></div>' +
+        '<div class="skills-grid">' + (sks || '<div class="empty">No skills registered</div>') + '</div>' +
 
-        <!-- Tasks -->
-        <div class="tasks-section">
-            <div class="section-header">
-                <div class="section-title">Recent Tasks</div>
-                <div class="task-count">${tasks.length} recorded</div>
-            </div>
-            <div class="tasks-list">${taskItems}</div>
-        </div>
+        '<div class="sh rv"><div class="sh-title">Recent Tasks</div><div class="sh-count">' + tasks.length + ' recorded</div></div>' +
+        '<div class="tasks-list">' + tItems + '</div>' +
 
-        <div class="page-footer">
-            Powered by <a href="/">Solana Agent Protocol (SAP)</a> · 
-            <a href="/api/agent" target="_blank">JSON</a> · 
-            <a href="/api/agent/manifest" target="_blank">OpenClaw Manifest</a>
-        </div>
-    `;
+        '<div class="pf rv" style="margin-top:40px">' +
+        'Powered by <a href="/">Solana Agent Protocol (SAP)</a> · ' +
+        '<a href="/api/agent" target="_blank">JSON</a> · ' +
+        '<a href="/api/agent/manifest" target="_blank">OpenClaw Manifest</a>' +
+        '</div>';
 
-    // Animate reputation bar
+    // observe new elements
+    document.querySelectorAll('.rv').forEach(el => ro.observe(el));
+
+    // Animate rep bar
     requestAnimationFrame(() => {
         setTimeout(() => {
             document.getElementById('repBar').style.width = rep + '%';
-            // Count up animation
-            let current = 0;
-            const step = rep / 40;
-            const counter = setInterval(() => {
-                current = Math.min(current + step, rep);
-                document.getElementById('repScore').textContent = Math.floor(current);
-                if (current >= rep) clearInterval(counter);
+            let cur = 0; const step = rep / 40;
+            const t = setInterval(() => {
+                cur = Math.min(cur + step, rep);
+                document.getElementById('repScore').textContent = Math.floor(cur);
+                if (cur >= rep) clearInterval(t);
             }, 25);
-        }, 100);
+        }, 150);
     });
 }
 
-loadAgent();
+async function loadAgent() {
+    try {
+        const [ar, tr] = await Promise.all([fetch('/api/agent'), fetch('/api/agent/tasks')]);
+        const ad = await ar.json();
+        const td = await tr.json();
+        if (ad.error) throw new Error(ad.error);
+        render(ad, td.tasks || []);
+    } catch (err) {
+        document.getElementById('content').innerHTML =
+            '<div class="err"><div style="font-size:22px;margin-bottom:8px">!</div>' +
+            '<div style="font-weight:600;margin-bottom:4px">Failed to load agent</div>' +
+            '<div style="font-size:13px;opacity:0.75">' + err.message + '</div></div>';
+    }
+}
 
-// Auto-refresh tasks every 15 seconds
+loadAgent();
 setInterval(async () => {
     try {
-        const res = await fetch('/api/agent/tasks');
-        const data = await res.json();
-        // Only refresh tasks list if page already rendered
-        const tasksList = document.querySelector('.tasks-list');
-        if (!tasksList || !data.tasks) return;
-        const agentRes = await fetch('/api/agent');
-        const agentData = await agentRes.json();
-        if (!agentData.error) render(agentData, data.tasks);
+        const [ar, tr] = await Promise.all([fetch('/api/agent'), fetch('/api/agent/tasks')]);
+        const ad = await ar.json(); const td = await tr.json();
+        if (!ad.error && td.tasks) render(ad, td.tasks);
     } catch {}
 }, 15000);
 </script>
